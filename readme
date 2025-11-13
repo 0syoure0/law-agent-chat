@@ -1,0 +1,316 @@
+# ⚖️ 공무원 법령 AI 어시스턴트
+
+민법 기반 RAG(Retrieval-Augmented Generation) 챗봇 시스템
+
+## 📋 목차
+
+- [프로젝트 소개](#-프로젝트-소개)
+- [주요 기능](#-주요-기능)
+- [기술 스택](#-기술-스택)
+- [시스템 아키텍처](#-시스템-아키텍처)
+- [설치 방법](#-설치-방법)
+- [실행 방법](#-실행-방법)
+- [사용 방법](#-사용-방법)
+- [API 문서](#-api-문서)
+- [트러블슈팅](#-트러블슈팅)
+
+## 🎯 프로젝트 소개
+
+공무원들이 업무 수행 시 필요한 법령 정보를 쉽고 빠르게 찾을 수 있도록 돕는 AI 기반 챗봇입니다.
+
+### 핵심 가치
+- 💡 복잡한 법령을 쉽게 이해
+- ⚡ 빠른 조문 검색
+- 📚 정확한 출처 제공
+- 🎯 실무 적용 가이드
+
+## ✨ 주요 기능
+
+### 1. RAG 기반 법령 검색
+- FAISS 벡터 데이터베이스
+- 의미 기반 유사도 검색
+- 실제 법령 조문 기반 답변
+
+### 2. 정확한 답변 생성
+- Google Gemini 2.0 Flash 사용
+- 참조 조문 자동 표시
+- 출처 추적 가능
+
+### 3. 직관적인 UI
+- 실시간 채팅 인터페이스
+- 대화 히스토리 관리
+- 반응형 디자인
+
+## 🛠 기술 스택
+
+### Backend
+- Python 3.10+
+- FastAPI
+- LangChain
+- FAISS
+- Google Gemini 2.0
+- HuggingFace Embeddings
+
+### Frontend
+- React 18+
+- JavaScript (ES6+)
+- CSS3
+
+## 🏗 시스템 아키텍처
+
+```
+사용자 질문
+    ↓
+질문 임베딩 (HuggingFace)
+    ↓
+FAISS 벡터 검색 → 관련 법령 조문 추출
+    ↓
+컨텍스트 구성 (RAG)
+    ↓
+Gemini LLM 생성 → AI 답변
+    ↓
+참조 조문 + 출처 표시
+```
+
+## 📦 설치 방법
+
+### 2. 백엔드 설정
+
+```bash
+cd backend
+
+# 가상환경 생성 (Windows)
+python -m venv .venv
+.venv\Scripts\activate
+
+# Mac/Linux
+python3 -m venv .venv
+source .venv/bin/activate
+
+# 패키지 설치
+pip install fastapi uvicorn python-dotenv
+pip install langchain langchain-google-genai langchain-community
+pip install google-generativeai
+pip install faiss-cpu sentence-transformers
+pip install pypdf
+```
+
+### 3. API 키 설정
+
+1. [Google AI Studio](https://aistudio.google.com/app/apikey) 접속
+2. "Create API key" 클릭하여 키 발급
+3. `backend/.env` 파일 생성:
+
+```env
+GEMINI_API_KEY=your-api-key-here
+```
+
+### 4. 법령 파일 준비
+
+`backend/` 폴더에 법령 PDF 파일 배치:
+```
+backend/
+├── 민법(법률)(제20432호)(20250131).pdf
+└── ...
+```
+
+### 5. 프론트엔드 설정
+
+```bash
+cd ../frontend
+npm install
+```
+
+## 🚀 실행 방법
+
+### 백엔드 서버 실행
+
+```bash
+cd backend
+python api_server.py
+```
+
+**성공 메시지:**
+```
+✅ 법령 AI 서버 준비 완료!
+INFO: Uvicorn running on http://0.0.0.0:8000
+```
+
+**⏱ 첫 실행**: 임베딩 모델 다운로드 (약 1.1GB, 1-2분 소요)
+
+### 프론트엔드 실행
+
+**새 터미널 열기:**
+
+```bash
+cd frontend
+npm start
+# 또는
+npm run dev
+```
+
+**접속:**
+- 프론트엔드: http://localhost:3000
+- API 문서: http://localhost:8000/docs
+
+## 💬 사용 방법
+
+### 예시 질문
+
+```
+✅ 권리능력은 언제 시작되나요?
+✅ 민법 제750조 내용은?
+✅ 부동산 매매계약에 대해 알려주세요
+✅ 소유권 취득시효는 몇 년인가요?
+```
+
+### 효과적인 질문 팁
+
+- 구체적으로 질문하기
+- 조문 번호 포함하기 (예: "제750조")
+- 상황을 명확히 설명하기
+
+## 📡 API 문서
+
+### POST /api/chat
+
+**Request:**
+```json
+{
+  "question": "권리능력은 언제 시작되나요?"
+}
+```
+
+**Response:**
+```json
+{
+  "answer": "권리능력은...",
+  "sources": ["민법(법률)(제20432호)(20250131).pdf"],
+  "articles": ["【제3조】"],
+  "success": true
+}
+```
+
+### 기타 엔드포인트
+
+- `GET /api/health` - 서버 상태 확인
+- `POST /api/reset` - 대화 초기화
+
+**자동 문서:** http://localhost:8000/docs
+
+## 🔧 트러블슈팅
+
+### API 키 오류
+```
+❌ GEMINI_API_KEY 환경 변수가 설정되지 않았습니다.
+```
+**해결:** `.env` 파일 확인
+
+### PDF 파일 오류
+```
+❌ 법령 파일을 찾을 수 없습니다
+```
+**해결:** PDF 파일이 `backend/` 폴더에 있는지 확인
+
+### 패키지 오류
+```
+ModuleNotFoundError
+```
+**해결:** 
+```bash
+pip install [패키지명]
+```
+
+### 백엔드 연결 실패
+```
+Failed to fetch
+```
+**해결:** 
+- 백엔드 서버 실행 확인
+- http://localhost:8000 접속 테스트
+
+## 🔒 보안 주의사항
+
+### ⚠️ 절대 하지 말 것
+
+- ❌ `.env` 파일을 Git에 커밋
+- ❌ API 키를 코드에 하드코딩
+- ❌ API 키를 공개 채팅방에 공유
+
+### ✅ 해야 할 것
+
+- `.gitignore`에 `.env` 추가
+- 팀원들은 각자 API 키 발급
+- `.env.example`만 저장소에 공유
+
+## 👥 팀원 가이드
+
+### 새 팀원 설정 (5분)
+
+1. **저장소 클론**
+2. **API 키 발급** (Google AI Studio)
+3. **백엔드 설정**
+   ```bash
+   cd backend
+   python -m venv .venv
+   .venv\Scripts\activate
+   pip install -r requirements.txt
+   echo GEMINI_API_KEY=your-key > .env
+   ```
+4. **프론트엔드 설정**
+   ```bash
+   cd frontend
+   npm install
+   ```
+5. **실행!**
+
+## 📁 프로젝트 구조
+
+```
+law-agent-chat/
+├── backend/
+│   ├── .env                  # 환경 변수 (Git 제외)
+│   ├── api_server.py         # FastAPI 서버
+│   ├── Law_agent.py          # RAG 엔진
+│   └── 민법(법률).pdf
+│
+├── frontend/
+│   ├── src/
+│   │   ├── App.jsx
+│   │   └── App.css
+│   └── package.json
+│
+└── README.md
+```
+
+## 💰 비용 안내
+
+### 무료 할당량 (충분함!)
+- 분당 15개 요청
+- 일일 1,500개 요청
+- 월 100만 토큰
+
+### 언제 무료?
+- ✅ 팀 프로젝트 (3-5명)
+- ✅ 수업 과제
+- ✅ 포트폴리오
+- ✅ 개인 학습
+
+**→ 일반인에게 공개하지 않는 한 완전 무료!**
+
+## 📈 향후 계획
+
+- [ ] 더 많은 법령 추가
+- [ ] 사용자 인증 시스템
+- [ ] 대화 저장 기능
+- [ ] 모바일 앱
+
+## 👨‍💻 개발팀
+
+- 팀명: [팀 이름]
+- 개발 기간: 2025.11
+- 연락처: [이메일]
+
+---
+
+**⭐ 도움이 되셨다면 Star를 눌러주세요!**
